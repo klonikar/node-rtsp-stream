@@ -7,7 +7,7 @@ const fs = require("fs")
 const hlss = require('hlss');
 
 if(process.argv.length < 7) {
-    console.log("Usage: " + process.argv[1] + " <urlType> <cameraURL> <outputFolder/port> <width> <height> [transport tcp|udp]");
+    console.log("Usage: " + process.argv[1] + " <urlType> <cameraURL> <outputFolder/port> <width> <height> [transport file|tcp|udp]");
     process.exit(0)
 }
 // TODO: handle withaudio. Needs change in the ffmpeg cmd line params.
