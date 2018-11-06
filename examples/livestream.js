@@ -7,27 +7,37 @@ const fs = require("fs")
 const hlss = require('hlss');
 
 if(process.argv.length < 7) {
-    console.log("Usage: " + process.argv[1] + " <urlType> <cameraURL> <outputFolder/port> <width> <height> [transport file|tcp|udp]");
+    console.log("Usage: " + process.argv[1] + " <urlType> <cameraURL> <outputFolder/port> <width> <height> [transport tcp|udp|file]");
     process.exit(0)
 }
 // TODO: handle withaudio. Needs change in the ffmpeg cmd line params.
 // "rtsp://root:pass@192.168.10.49:554/axis-media/media.amp?resolution=640X480&fps=15"
 var urlType = process.argv[2];
+if(urlType === "wss" && process.argv.length < 9) {
+    logger.debug("Usage: " + process.argv[1] + " wss <cameraURL> <outputFolder/port> <width> <height> <keyFile> <certificateFile> [transport tcp|udp|file]");
+    process.exit(0);    
+}
 var srcUrl = process.argv[3];
 var width = process.argv[5];
 var height = process.argv[6];
-var transport = process.argv.length > 7 ? process.argv[7] : "tcp";
+var keyFile = (urlType === "wss" ? process.argv[7] : null);
+var certificateFile = (urlType === "wss" ? process.argv[8] : null);
+var transportArgIndex = (urlType === "wss" ? 9 : 7);
+var transport = process.argv.length > transportArgIndex ? process.argv[transportArgIndex] : "tcp";
 
-if(urlType == "ws") {
+if(["ws", "wss"].find(t => { return t == urlType; })) {
     var port = process.argv[4];
-    const Stream = require('node-rtsp-stream');
+    const Stream = require('./node-rtsp-stream');
+    var sslCredentials = (urlType === "wss" ? {keyFile: keyFile, certificateFile: certificateFile} : null);
     const stream = new Stream({
         name: 'LiveStream',
         streamUrl: srcUrl,
         wsPort: parseInt(port),
         width: width,
         height: height,
-        transport: transport
+        transport: transport,
+        sslCredentials: sslCredentials
+
     });
 }
 else {
